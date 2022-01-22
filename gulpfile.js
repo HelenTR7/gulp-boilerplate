@@ -6,6 +6,7 @@ const gulp = require('gulp'),
       cleanCSS = require('gulp-clean-css'),
       pug = require('gulp-pug'),
       plumber = require('gulp-plumber'),
+      concat = require('gulp-concat'),
       del = require('del');
         
 
@@ -43,10 +44,37 @@ function css() {
         .pipe(browserSync.stream())
 }
 
+// функция js
+function js() {
+    return gulp.src('src/assets/js/app.js')
+        .pipe(gulp.dest('build/assets/js'))
+        .pipe(browserSync.stream())
+}
+
 // функция копирования изображений
 function images() {
     return gulp.src('src/assets/imgs/**/*')
         .pipe(gulp.dest('build/assets/imgs'))
+        .pipe(browserSync.stream())
+}
+
+// функция js модулей
+function vendorJS() {
+    return gulp.src([
+            'node_modules/swiper/swiper-bundle.min.js',
+        ])
+        .pipe(concat('vendors.min.js'))
+        .pipe(gulp.dest('build/assets/js'))
+        .pipe(browserSync.stream())
+}
+  
+// функция css модулей  
+function vendorCSS() {
+    return gulp.src([
+        'node_modules/swiper/swiper-bundle.min.css',
+        ])
+        .pipe(concat('vendors.min.css'))
+        .pipe(gulp.dest('build/assets/css'))
         .pipe(browserSync.stream())
 }
 
@@ -59,6 +87,7 @@ function clear() {
 function watcher() {
     gulp.watch('src/pug/**/*.pug', html)
     gulp.watch('src/assets/scss/**/*.scss', css)
+    gulp.watch('src/assets/js/*.js', js)
     gulp.watch('src/assets/imgs/**/*', images)
 }
 
@@ -66,7 +95,7 @@ function watcher() {
 gulp.task(
     'default',
     gulp.series(
-        gulp.parallel(html, css, images),
+        gulp.parallel(html, css, js, images, vendorJS, vendorCSS),
         gulp.parallel(watcher, browsersync)
     )
 );
